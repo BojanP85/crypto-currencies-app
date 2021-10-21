@@ -1,20 +1,22 @@
 import { useEffect, useState } from 'react';
 
-export const useWebsocket = (initialChannel = {}, initialPairs = []) => {
+export const useWebsocket = (initialChannel = {}, initialPairs = null) => {
+  const [channels, setChannels] = useState(initialChannel);
   const [pairs, setPairs] = useState(initialPairs);
-  const [channel, setChannel] = useState(initialChannel);
 
   useEffect(() => {
     let isMounted = true;
-    let channels = {};
+    let channelsObject = {};
 
     const wss = new WebSocket('wss://api-pub.bitfinex.com/ws/2');
 
     wss.onopen = () => {
-      for (let i of pairs) {
-        let pair = { "event": "subscribe", "channel": "ticker" };
-        pair.symbol = `t${i.toUpperCase()}`;
-        wss.send(JSON.stringify(pair));
+      if (pairs) {
+        for (let i of pairs) {
+          let pair = { "event": "subscribe", "channel": "ticker" };
+          pair.symbol = `t${i.toUpperCase()}`;
+          wss.send(JSON.stringify(pair));
+        }
       }
     };
 
@@ -23,25 +25,21 @@ export const useWebsocket = (initialChannel = {}, initialPairs = []) => {
 
       if (data.event === 'subscribed') {
         if (isMounted) {
-          setChannel(prevValues => {
-            return { ...prevValues, [data.symbol]: data }
+          setChannels(prevValues => {
+            return { ...prevValues, [data.symbol]: data };
           });
+          channelsObject[data.chanId] = data;
         }
-        channels[data.chanId] = data.symbol;
       } else {
-        if (data.shift) {
-          let chanId = data.shift();
-          // console.log('chanId', chanId);
+        if (data[1] !== 'hb') {
+          let chanName = channelsObject[data[0]];
 
-          if (data[0] !== "hb") {
-            let chanName = channels[chanId];
-            // console.log('chanName', chanName);
-
-            Object.keys(channel).forEach(key => {
-              if (chanName === key && data[0] && data[0].length === 10) {
+          if (chanName) {
+            Object.keys(channelsObject).forEach(key => {
+              if (chanName.chanId.toString() === key && data[1] && data[1].length === 10) {
                 if (isMounted) {
-                  setChannel(prevValues => {
-                    return { ...prevValues, [key]: data[0] }
+                  setChannels(prevValues => {
+                    return { ...prevValues, [chanName.symbol]: data[1] };
                   });
                 }
               }
@@ -59,8 +57,8 @@ export const useWebsocket = (initialChannel = {}, initialPairs = []) => {
   }, [pairs]);
 
   return {
-    channel,
-    setChannel,
+    channels,
+    setChannels,
     pairs,
     setPairs
   };

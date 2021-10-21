@@ -10,15 +10,9 @@ import Favorites from './pages/Favorites';
 import { useWebsocket } from './util/hooks';
 
 const App = () => {
-  const { user } = useContext(AuthContext);
+  const { channels, setPairs } = useWebsocket({}, []);
 
-  const { channel, setPairs } = useWebsocket({
-    tBTCUSD: [],
-    tLTCUSD: [],
-    tLTCBTC: [],
-    tETHUSD: [],
-    tETHBTC: []
-  }, []);
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     let isMounted = true;
@@ -43,7 +37,7 @@ const App = () => {
           exact
           path='/'
           render={props => (
-            <Home {...props} channel={channel} />
+            <Home {...props} channels={channels} />
           )}
         />
         <Route exact path='/details/:id' component={Details} />
