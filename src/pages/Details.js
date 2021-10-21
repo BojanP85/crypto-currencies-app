@@ -4,6 +4,7 @@ import axios from 'axios';
 import { AuthContext } from '../contexts/auth';
 import { Table } from '../styles/table';
 import { Button } from '../styles/button';
+import { numberFormatting } from '../util/numberFormatting';
 
 const Details = props => {
   const { user } = useContext(AuthContext);
@@ -35,9 +36,9 @@ const Details = props => {
     return pair && (
       <tr>
         <td>{symbol}</td>
-        <td>{pair.last_price}</td>
-        <td>{pair.high}</td>
-        <td>{pair.low}</td>
+        <td>{numberFormatting(pair.last_price)}</td>
+        <td>{numberFormatting(pair.high)}</td>
+        <td>{numberFormatting(pair.low)}</td>
       </tr>
     );
   };
@@ -58,7 +59,7 @@ const Details = props => {
 
   const renderAddToButton = () => {
     if (user) {
-      return favoritePairs.includes(symbol) ? (
+      return favoritePairs && favoritePairs.includes(symbol) ? (
         <Button onClick={() => removeFromFavorites(symbol)} Favorites Remove>Remove from favorites</Button>
       ) : (
         <Button onClick={() => addToFavorites(symbol)} Favorites>Add to favorites</Button>

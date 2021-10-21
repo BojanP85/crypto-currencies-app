@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { Table, PercentTd } from '../styles/table';
+import { numberFormatting } from '../util/numberFormatting';
 
 const CurrenciesTable = props => {
   const { channel } = props;
@@ -13,13 +14,13 @@ const CurrenciesTable = props => {
           <td>
             <Link to={`/details/${key}`}>{key.substring(1)}</Link>
           </td>
-          <td>{channel[key][6]}</td>
-          <td>{channel[key][4]}</td>
+          <td>{numberFormatting(channel[key][6])}</td>
+          <td>{numberFormatting(channel[key][4])}</td>
           <PercentTd GreaterThanZero={channel[key][5] > 0 ? true : false}>
-            {channel[key][5]}
+            {numberFormatting(channel[key][5] * 100, true)}%
           </PercentTd>
-          <td>{channel[key][8]}</td>
-          <td>{channel[key][9]}</td>
+          <td>{numberFormatting(channel[key][8])}</td>
+          <td>{numberFormatting(channel[key][9])}</td>
         </tr>
       );
     });
